@@ -186,10 +186,11 @@ const recentAlerts = [
 
 <style scoped>
 .dashboard-container {
-  padding: 10px;
   width: 100%;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .statistics-card {
@@ -242,11 +243,20 @@ const recentAlerts = [
 }
 
 .chart-row, .table-row {
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .chart-card, .table-card {
   border-radius: 8px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  flex: 1;
 }
 
 .card-header-title {

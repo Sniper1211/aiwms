@@ -118,6 +118,7 @@ const logout = () => {
   overflow: hidden;
   min-width: 0;
   width: calc(100% - 210px);
+  max-width: calc(100% - 210px);
 }
 
 .navbar {
@@ -152,6 +153,7 @@ const logout = () => {
 .app-main {
   flex: 1;
   width: 100%;
+  max-width: 100%;
   overflow-y: auto;
   background: #f0f2f5;
   padding: 20px;
