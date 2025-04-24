@@ -1,3 +1,4 @@
+import { useUserStore } from '@/stores/user.js';
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
@@ -53,10 +54,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('token')
-  
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
+  const store = useUserStore()
+  if (to.meta.requiresAuth && !store.token) {
+    next({ path: '/login' })
   } else {
     next()
   }
