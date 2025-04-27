@@ -72,8 +72,8 @@ const handleLogin = () => {
       // 实际项目中应该调用API进行身份验证
       if (loginForm.username === 'admin' && loginForm.password === '123456') {
         localStorage.setItem('token', 'admin-token')
-        router.push('/')
         ElMessage.success('登录成功')
+        router.push('/')
       } else {
         ElMessage.error('用户名或密码错误')
       }

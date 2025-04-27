@@ -1,0 +1,11 @@
+{
+  "alerts": [
+    {
+      "id": 1,
+      "type": "库存不足",
+      "material": "钢板",
+      "quantity": 10,
+      "status": "待处理"
+    }
+  ]
+}

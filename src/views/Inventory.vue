@@ -161,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Upload, Download } from '@element-plus/icons-vue'
 
@@ -173,108 +173,28 @@ const searchForm = reactive({
 })
 
 // 表格数据
-const tableData = ref([
-  {
-    id: 'M001',
-    name: 'ABS高抗冲塑料颗粒',
-    category: '塑料',
-    price: 25.50,
-    stock: 1200.5,
-    threshold: 500.0,
-    status: 'normal',
-    lastUpdate: '2023-06-15 10:23:45'
-  },
-  {
-    id: 'M002',
-    name: 'PP聚丙烯塑料板材',
-    category: '塑料',
-    price: 18.75,
-    stock: 450.0,
-    threshold: 500.0,
-    status: 'warning',
-    lastUpdate: '2023-06-14 16:42:30'
-  },
-  {
-    id: 'M003',
-    name: 'EPDM三元乙丙橡胶',
-    category: '橡胶',
-    price: 32.80,
-    stock: 850.0,
-    threshold: 400.0,
-    status: 'normal',
-    lastUpdate: '2023-06-13 09:15:22'
-  },
-  {
-    id: 'M004',
-    name: '丁腈橡胶密封圈材料',
-    category: '橡胶',
-    price: 45.60,
-    stock: 320.0,
-    threshold: 350.0,
-    status: 'warning',
-    lastUpdate: '2023-06-12 14:35:18'
-  },
-  {
-    id: 'M005',
-    name: '6063铝合金型材',
-    category: '铝材',
-    price: 28.90,
-    stock: 0.0,
-    threshold: 200.0,
-    status: 'outOfStock',
-    lastUpdate: '2023-06-11 11:28:36'
-  },
-  {
-    id: 'M006',
-    name: '1060纯铝板',
-    category: '铝材',
-    price: 22.50,
-    stock: 680.0,
-    threshold: 300.0,
-    status: 'normal',
-    lastUpdate: '2023-06-10 15:47:52'
-  },
-  {
-    id: 'M007',
-    name: '304不锈钢板',
-    category: '钢材',
-    price: 35.20,
-    stock: 180.0,
-    threshold: 200.0,
-    status: 'warning',
-    lastUpdate: '2023-06-09 10:12:45'
-  },
-  {
-    id: 'M008',
-    name: '碳钢冲压件',
-    category: '钢材',
-    price: 15.80,
-    stock: 950.0,
-    threshold: 400.0,
-    status: 'normal',
-    lastUpdate: '2023-06-08 16:23:19'
-  },
-  {
-    id: 'M009',
-    name: '温度传感器元件',
-    category: '电子元件',
-    price: 68.00,
-    stock: 520.0,
-    threshold: 300.0,
-    status: 'normal',
-    lastUpdate: '2023-06-07 09:34:27'
-  },
-  {
-    id: 'M010',
-    name: '压力控制开关',
-    category: '电子元件',
-    price: 85.50,
-    stock: 420.0,
-    threshold: 250.0,
-    status: 'normal',
-    lastUpdate: '2023-06-06 14:56:38'
+const tableData = ref([])
+
+// 获取库存数据
+const fetchMaterials = async () => {
+  loading.value = true
+  try {
+    const response = await fetch('/api/materials')
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+    const data = await response.json()
+    tableData.value = data.materials
+    total.value = data.materials.length
+  } catch (error) {
+    ElMessage.error('数据加载失败：' + error.message)
+  } finally {
+    loading.value = false
   }
-])
+}
+
+// 初始化加载数据
+onMounted(() => {
+  fetchMaterials()
+})
 
 // 分页相关
 const currentPage = ref(1)

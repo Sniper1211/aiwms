@@ -13,10 +13,12 @@
         active-text-color="#409EFF"
         router
       >
-        <el-menu-item v-for="route in routes" :key="route.path" :index="route.path">
+        <template v-for="route in routes" :key="route.path">
+        <el-menu-item :index="route.path">
           <el-icon><component :is="route.meta.icon" /></el-icon>
           <span>{{ route.meta.title }}</span>
         </el-menu-item>
+      </template>
       </el-menu>
     </div>
     
