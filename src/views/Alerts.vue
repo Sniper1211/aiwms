@@ -193,6 +193,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check, Close, Download } from '@element-plus/icons-vue'
+import axios from 'axios'
 
 // 搜索表单
 const searchForm = reactive({
@@ -202,150 +203,34 @@ const searchForm = reactive({
 })
 
 // 表格数据
-const tableData = ref([
-  {
-    id: 'AL001',
-    product: 'ABS工程塑料',
-    type: '库存不足',
-    current: 480.5,
-    threshold: 500,
-    createTime: '2023-06-15 09:23:12',
-    status: 'pending',
-    processTime: '',
-    action: '',
-    remark: ''
-  },
-  {
-    id: 'AL002',
-    product: 'EPDM橡胶密封条',
-    type: '即将过期',
-    current: 680.0,
-    threshold: 700,
-    createTime: '2023-06-14 14:15:30',
-    status: 'pending',
-    processTime: '',
-    action: '',
-    remark: '存放时间即将达到180天'
-  },
-  {
-    id: 'AL003',
-    product: '铝合金散热片',
-    type: '滞销材料',
-    current: 950.0,
-    threshold: 300,
-    createTime: '2023-06-13 11:05:44',
-    status: 'pending',
-    processTime: '',
-    action: '',
-    remark: '超过90天未使用'
-  },
-  {
-    id: 'AL004',
-    product: '304不锈钢板',
-    type: '库存不足', 
-    current: 380.0,
-    threshold: 500,
-    createTime: '2023-06-12 16:45:21',
-    status: 'pending',
-    processTime: '',
-    action: '',
-    remark: ''
-  }
-])
-
-// 分页相关
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(100)
-
-// 加载状态
+const tableData = ref([])
+const total = ref(0)
 const loading = ref(false)
 
-// 选中的行
-const multipleSelection = ref([])
-
-// 处理预警对话框相关
-const processDialogVisible = ref(false)
-const processFormRef = ref(null)
-const processForm = reactive({
-  id: '',
-  product: '',
-  type: '',
-  action: '',
-  remark: ''
-})
-
-// 处理表单验证规则
-const processRules = {
-  action: [{ required: true, message: '请选择处理方式', trigger: 'change' }],
-  remark: [{ required: true, message: '请输入处理备注', trigger: 'blur' }]
-}
-
-// 预警详情对话框相关
-const detailDialogVisible = ref(false)
-const detailData = reactive({
-  id: '',
-  product: '',
-  type: '',
-  current: 0,
-  threshold: 0,
-  createTime: '',
-  status: '',
-  processTime: '',
-  action: '',
-  remark: ''
-})
-
-// 获取预警类型标签
-const getAlertTypeTag = (type) => {
-  switch (type) {
-    case '库存不足':
-      return 'danger'
-    case '即将过期':
-      return 'warning'
-    case '滞销商品':
-      return 'info'
-    default:
-      return ''
-  }
-}
-
-// 获取状态类型
-const getStatusType = (status) => {
-  switch (status) {
-    case 'pending':
-      return 'danger'
-    case 'processed':
-      return 'success'
-    case 'ignored':
-      return 'info'
-    default:
-      return ''
-  }
-}
-
-// 获取状态文本
-const getStatusText = (status) => {
-  switch (status) {
-    case 'pending':
-      return '未处理'
-    case 'processed':
-      return '已处理'
-    case 'ignored':
-      return '已忽略'
-    default:
-      return '未知'
+// 获取预警数据
+const fetchAlerts = async () => {
+  try {
+    loading.value = true
+    const response = await axios.get('/api/alerts', {
+      params: {
+        ...searchForm,
+        page: currentPage.value,
+        pageSize: pageSize.value
+      }
+    })
+    tableData.value = response.data.items
+    total.value = response.data.total
+  } catch (error) {
+    ElMessage.error('获取预警数据失败')
+  } finally {
+    loading.value = false
   }
 }
 
 // 搜索
 const handleSearch = () => {
-  loading.value = true
-  // 实际项目中应该调用API进行搜索
-  setTimeout(() => {
-    loading.value = false
-    ElMessage.success('搜索成功')
-  }, 500)
+  currentPage.value = 1
+  fetchAlerts()
 }
 
 // 重置搜索
@@ -378,29 +263,25 @@ const handleProcessFromDetail = () => {
 }
 
 // 提交处理表单
-const submitProcessForm = () => {
-  processFormRef.value.validate((valid) => {
-    if (valid) {
-      // 实际项目中应该调用API进行处理
-      setTimeout(() => {
-        processDialogVisible.value = false
-        ElMessage.success('处理成功')
-        
-        // 更新表格数据（实际项目中应该重新加载数据）
-        const index = tableData.value.findIndex(item => item.id === processForm.id)
-        if (index !== -1) {
-          tableData.value[index].status = 'processed'
-          tableData.value[index].processTime = new Date().toLocaleString()
-          tableData.value[index].action = processForm.action
-          tableData.value[index].remark = processForm.remark
-        }
-      }, 500)
-    }
-  })
+const submitProcessForm = async () => {
+  try {
+    await processFormRef.value.validate()
+    await axios.put(`/api/alerts/${processForm.id}`, {
+      status: 'processed',
+      action: processForm.action,
+      remark: processForm.remark,
+      processTime: new Date().toISOString()
+    })
+    ElMessage.success('处理成功')
+    processDialogVisible.value = false
+    fetchAlerts()
+  } catch (error) {
+    if (!error.response) ElMessage.error('处理失败')
+  }
 }
 
 // 忽略预警
-const handleIgnore = (row) => {
+const handleIgnore = async (row) => {
   ElMessageBox.confirm(
     `确定要忽略预警 ${row.id} 吗？`,
     '提示',
@@ -428,7 +309,7 @@ const handleIgnore = (row) => {
 }
 
 // 恢复预警
-const handleRestore = (row) => {
+const handleRestore = async (row) => {
   ElMessageBox.confirm(
     `确定要恢复预警 ${row.id} 吗？`,
     '提示',
@@ -606,3 +487,8 @@ const handleCurrentChange = (val) => {
   justify-content: flex-end;
 }
 </style>
+
+// 初始化加载数据
+onMounted(() => {
+  fetchAlerts()
+})
