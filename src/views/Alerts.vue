@@ -36,10 +36,10 @@
       </el-form>
       
       <div class="operation-buttons">
-        <el-button type="primary" @click="handleBatchProcess" :disabled="!multipleSelection.length">
+        <el-button type="primary" @click="handleBatchProcess" :disabled="!(multipleSelection?.length ?? false)">
           <el-icon><Check /></el-icon>批量处理
         </el-button>
-        <el-button type="info" @click="handleBatchIgnore" :disabled="!multipleSelection.length">
+        <el-button type="info" @click="handleBatchIgnore" :disabled="!(multipleSelection?.length ?? false)">
           <el-icon><Close /></el-icon>批量忽略
         </el-button>
         <el-button type="success" @click="handleExport">
@@ -436,7 +436,7 @@ const handleExport = () => {
 
 // 表格选择变化
 const handleSelectionChange = (selection) => {
-  multipleSelection.value = selection
+  multipleSelection.value = selection || []
 }
 
 // 分页大小变化
