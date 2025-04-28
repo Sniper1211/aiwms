@@ -75,6 +75,7 @@ const activeMenu = computed(() => {
 // 退出登录
 const logout = () => {
   localStorage.removeItem('token')
+  store.removeToken()
   router.push('/login')
 }
 </script>

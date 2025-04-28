@@ -38,6 +38,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const loginFormRef = ref(null)
@@ -72,6 +73,8 @@ const handleLogin = () => {
       // 实际项目中应该调用API进行身份验证
       if (loginForm.username === 'admin' && loginForm.password === '123456') {
         localStorage.setItem('token', 'admin-token')
+        const authStore = useAuthStore()
+        authStore.setToken('admin-token')
         ElMessage.success('登录成功')
         router.push('/')
       } else {
